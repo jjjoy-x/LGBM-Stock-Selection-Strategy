@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # LGBM Stock Selection Strategy
-# 
+## LGBM Stock Selection Strategy
+ 
 # This notebook contains the following sections:
 # - 1. Data Preparation: Calculating Daily and Monthly Returns
 # - 2. Factor Construction: Market Cap Factor, Momentum Factor, Custom Factor
@@ -10,7 +7,7 @@
 # - 4. Strategy Backtesting
 # - 5. Strategy Analysis
 
-# # Import libraries
+## Import libraries
 import os
 os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 import pandas as pd
@@ -23,7 +20,7 @@ from lightgbm import LGBMRegressor
 from sklearn.model_selection import train_test_split
 
 
-# ## 1. Data Preparation: Calculating Daily and Monthly Returns
+## 1. Data Preparation: Calculating Daily and Monthly Returns
 
 # Read data
 df = pd.read_excel(r"C:\\Users\\13770\\Desktop\\data\\stock_data.xlsx")
@@ -46,7 +43,7 @@ df_reset[['TRADE_DATE', 'TICKER_SYMBOL', 'daily_return']].to_excel('daily_return
 monthly_return.to_excel('monthly_return.xlsx', index=False)
 
 
-# ## Factor Construction
+## Factor Construction
 
 # Market cap factor: ln(month-end market cap)
 monthly_mv = df.groupby(['TICKER_SYMBOL', pd.Grouper(freq='ME')])['MV'].last().reset_index()
@@ -73,7 +70,7 @@ factors.to_excel(excel_path, index=False)
 print(f"Factor data exported to Excel file: {excel_path}")
 
 
-# ## LGBM Stock Selection Strategy
+## LGBM Stock Selection Strategy
 
 # Build feature table
 factors = monthly_mv.merge(monthly_close[['TICKER_SYMBOL', 'TRADE_DATE', 'momentum']], on = ['TICKER_SYMBOL', 'TRADE_DATE'], how = 'inner')
@@ -107,7 +104,7 @@ print(f"Portfolio stock size: {len(portfolio)}")
 portfolio.to_excel("portfolio_results.xlsx", index=False)
 
 
-# ## 4. Strategy Backtesting
+## 4. Strategy Backtesting
 
 # Merge returns
 df = df_reset.reset_index(drop = True)
@@ -235,9 +232,9 @@ plt.tight_layout()
 plt.show()
 
 
-# ## 5. Strategy Analysis
+## 5. Strategy Analysis
 
-# ### 5.1 What market conditions does the strategy perform well in? Why?
+## 5.1 What market conditions does the strategy perform well in? Why?
 # The strategy performs well in market conditions with strong trends or early recovery periods, especially:
 # 
 # 1. Market overall up or recovery period (e.g., policy benefits, macroeconomic recovery)
@@ -265,7 +262,7 @@ plt.show()
 # - LGBM model can make better predictions when the "signal is valid", but the model's stability decreases when the market is volatile or experiencing a systemic downturn (high noise, momentum factors are less effective)
 
 # 
-# ### 5.2 How to improve the strategy?
+## 5.2 How to improve the strategy?
 # - Introduce more style factors, such as value, volatility, quality factors, etc.
 
 # PE valuation reversal factor (approximated by 1/PE)
@@ -294,7 +291,7 @@ test['predicted_return'] = test[['pred_lgbm', 'pred_xgb', 'pred_nn']].mean(axis=
 # - Add turnover control, industry neutralization, and risk control module
 
 
-# # Control turnover
+# Control turnover
 # Record last month's holdings
 holdings = {}
 turnover_record = []
@@ -307,7 +304,7 @@ for date, group in test.groupby('TRADE_DATE'):
     holdings['prev'] = top_stocks
 
 
-# # Industry neutralization
+## Industry neutralization
 # If there is an industry column, it can be implemented by groupby + demean
 factors['momentum_ind_neutral'] = factors.groupby(['TRADE_DATE', 'industry'])['momentum'].transform(lambda x: x - x.mean())
 
